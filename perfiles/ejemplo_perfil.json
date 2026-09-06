@@ -1,0 +1,19 @@
+{
+  "nombre": "Juana",
+  "generos_favoritos": {
+    "peliculas": ["thriller", "sci-fi", "drama"],
+    "libros": ["policial", "ensayo"]
+  },
+  "contenido_favorito": [
+    {"titulo": "Prisoners", "tipo": "pelicula"},
+    {"titulo": "1984", "tipo": "libro"},
+    {"titulo": "Arrival"}
+  ],
+  "no_banca": {
+    "generos": ["romance", "terror"],
+    "titulos": [
+      {"titulo": "Twilight", "tipo": "pelicula"}
+    ]
+  },
+  "notas_libres": "prefiero cosas cortas, poco tiempo libre"
+}
