@@ -12,7 +12,8 @@ def normalizar_peliculas(peliculas_crudas: list[dict]) -> pd.DataFrame:
         titulo = p.get("title") or p.get("original_title") or ""
         anio = None
         fecha = p.get("release_date") or ""
-        if len(fecha) >= 4:
+        # CORRECCIÓN: Se agregó .isdigit()
+        if len(fecha) >= 4 and fecha[:4].isdigit():
             anio = int(fecha[:4])
 
         if not sinopsis or not titulo:
@@ -52,6 +53,13 @@ def normalizar_libros(libros_crudos: list[dict]) -> pd.DataFrame:
             anio = int(fecha[:4])
 
         autores = info.get("authors") or []
+        
+        # --- NUEVO: Normalización e imputación de rating ---
+        rating_crudo = info.get("averageRating")
+        if pd.notna(rating_crudo) and rating_crudo is not None:
+            rating_normalizado = rating_crudo * 2
+        else:
+            rating_normalizado = 6.0  # Imputamos 6.0 para no romper el RAG
 
         filas.append(
             {
@@ -60,7 +68,7 @@ def normalizar_libros(libros_crudos: list[dict]) -> pd.DataFrame:
                 "titulo": titulo,
                 "sinopsis": sinopsis,
                 "generos": item.get("_genero_buscado", ""),
-                "rating": info.get("averageRating"),
+                "rating": rating_normalizado,  # Usamos la variable normalizada
                 "anio": anio,
                 "fuente": "google_books",
                 "fuente_id": item.get("id"),

@@ -14,16 +14,16 @@ GOOGLE_BOOKS_BASE_URL = "https://www.googleapis.com/books/v1/volumes"
 # Géneros/temas usados como queries de búsqueda, ya que Google Books no tiene
 # un endpoint de "discover por género" como TMDB.
 GENEROS_BUSQUEDA = [
-    "fiction",
-    "science fiction",
-    "fantasy",
-    "mystery",
+    "ficción",
+    "ciencia ficción",
+    "fantasía",
+    "misterio",
     "thriller",
     "romance",
-    "biography",
-    "history",
-    "horror",
-    "poetry",
+    "biografía",
+    "historia",
+    "terror",
+    "poesía",
 ]
 
 
