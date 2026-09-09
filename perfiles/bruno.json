@@ -1,0 +1,19 @@
+{
+  "nombre": "Bruno",
+  "generos_favoritos": {
+    "peliculas": ["terror", "thriller", "ciencia ficcion"],
+    "libros": ["terror", "misterio"]
+  },
+  "contenido_favorito": [
+    {"titulo": "Hereditary", "tipo": "pelicula"},
+    {"titulo": "It", "tipo": "libro"},
+    {"titulo": "Get Out", "tipo": "pelicula"}
+  ],
+  "no_banca": {
+    "generos": ["romance", "musical"],
+    "titulos": [
+      {"titulo": "The Notebook", "tipo": "pelicula"}
+    ]
+  },
+  "notas_libres": "cuanto mas perturbadora la pelicula mejor, romance ni loco"
+}

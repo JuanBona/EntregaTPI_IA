@@ -1,0 +1,19 @@
+{
+  "nombre": "Rafa",
+  "generos_favoritos": {
+    "peliculas": ["drama", "policial", "misterio"],
+    "libros": ["policial", "ensayo"]
+  },
+  "contenido_favorito": [
+    {"titulo": "Prisoners", "tipo": "pelicula"},
+    {"titulo": "The Silent Patient", "tipo": "libro"},
+    {"titulo": "Zodiac", "tipo": "pelicula"}
+  ],
+  "no_banca": {
+    "generos": ["terror", "fantasia"],
+    "titulos": [
+      {"titulo": "Saw", "tipo": "pelicula"}
+    ]
+  },
+  "notas_libres": "no banco terror ni sustos, prefiero tension psicologica antes que gore"
+}

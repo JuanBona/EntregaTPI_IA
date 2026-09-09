@@ -1,0 +1,19 @@
+{
+  "nombre": "Juan",
+  "generos_favoritos": {
+    "peliculas": ["accion", "aventura", "ciencia ficcion"],
+    "libros": ["fantasia", "aventura"]
+  },
+  "contenido_favorito": [
+    {"titulo": "Mad Max: Fury Road", "tipo": "pelicula"},
+    {"titulo": "The Hobbit", "tipo": "libro"},
+    {"titulo": "Arrival", "tipo": "pelicula"}
+  ],
+  "no_banca": {
+    "generos": ["terror", "romance"],
+    "titulos": [
+      {"titulo": "Twilight", "tipo": "pelicula"}
+    ]
+  },
+  "notas_libres": "prefiero algo con ritmo y accion, no me copan los dramones largos"
+}
