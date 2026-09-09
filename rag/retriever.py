@@ -39,7 +39,7 @@ def retriever(query: str, k: int = 5, tipo: str | None = None) -> list[dict]:
                 "rating": doc.metadata.get("rating"),
                 "anio": doc.metadata.get("anio"),
                 "autor_director": doc.metadata.get("autor_director"),
-                "sinopsis": doc.page_content.split("Sinopsis: ", 1)[-1],
+                "sinopsis": doc.page_content.split("Sinopsis: ", 1)[-1], 
                 "score": score,  # distancia: más bajo = más parecido
             }
         )
