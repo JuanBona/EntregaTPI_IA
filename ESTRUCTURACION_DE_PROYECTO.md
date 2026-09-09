@@ -39,7 +39,7 @@ tiene que esperar de verdad es `notebook`.
 | `rag/` | `feature/rag` | Embeddings + ChromaDB, función `retriever(query, k)` | `data/dataset.csv` (real o de prueba) | rafatrucco |
 | `agent/` | `feature/agent` | Cruzar los 5 perfiles, armar criterio de búsqueda, rankear candidatos | `rag.retriever` | JuanBona |
 | `prompts/` | `feature/prompts` | Personalidad "canchero argentino", iterar tono | nada | marcosberruhet |
-| `notebook/` | `feature/notebook` | Integrar todo en el notebook final de Colab | los 4 anteriores en `main` | *pendiente — falta 5to integrante* |
+| `notebook/` | `feature/notebook` | Integrar todo en el notebook final de Colab | los 4 anteriores en `main` | BrunoNeirotti |
 
 Asignación provisoria (se puede reacomodar si a alguien le cierra más otro módulo,
 avisen en el grupo). Los 5 completan además su propio `perfiles/<nombre>.json`.
