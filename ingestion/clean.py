@@ -5,16 +5,20 @@ import pandas as pd
 from ingestion.schema import COLUMNAS, generar_id
 
 
+def _parsear_anio(fecha: str | None) -> int | None:
+    """Extrae el año de una fecha tipo "YYYY-MM-DD" (o similar). None si no es válida."""
+    fecha = fecha or ""
+    if len(fecha) >= 4 and fecha[:4].isdigit():
+        return int(fecha[:4])
+    return None
+
+
 def normalizar_peliculas(peliculas_crudas: list[dict]) -> pd.DataFrame:
     filas = []
     for p in peliculas_crudas:
         sinopsis = (p.get("overview") or "").strip()
         titulo = p.get("title") or p.get("original_title") or ""
-        anio = None
-        fecha = p.get("release_date") or ""
-        # CORRECCIÓN: Se agregó .isdigit()
-        if len(fecha) >= 4 and fecha[:4].isdigit():
-            anio = int(fecha[:4])
+        anio = _parsear_anio(p.get("release_date"))
 
         if not sinopsis or not titulo:
             continue  # sin sinopsis no sirve para el RAG
@@ -47,16 +51,13 @@ def normalizar_libros(libros_crudos: list[dict]) -> pd.DataFrame:
         if not sinopsis or not titulo:
             continue
 
-        anio = None
-        fecha = info.get("publishedDate") or ""
-        if len(fecha) >= 4 and fecha[:4].isdigit():
-            anio = int(fecha[:4])
+        anio = _parsear_anio(info.get("publishedDate"))
 
         autores = info.get("authors") or []
-        
+
         # --- NUEVO: Normalización e imputación de rating ---
         rating_crudo = info.get("averageRating")
-        if pd.notna(rating_crudo) and rating_crudo is not None:
+        if pd.notna(rating_crudo):
             rating_normalizado = rating_crudo * 2
         else:
             rating_normalizado = 6.0  # Imputamos 6.0 para no romper el RAG
