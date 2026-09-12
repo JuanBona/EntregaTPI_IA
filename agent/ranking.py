@@ -1,5 +1,7 @@
 """Rankea los candidatos que trajo rag.retriever según qué tan bien le cierran a los 5 perfiles."""
 
+import unicodedata
+
 from agent.perfil import Perfil
 
 PESO_GENERO_FAVORITO = 1.0
@@ -8,28 +10,41 @@ PESO_TITULO_NO_BANCADO = -3.0
 PESO_RATING = 0.1  # rating típico 0-10, así aporta hasta +1 al score
 
 
+def _normalizar(texto: str) -> str:
+    """Minúsculas y sin tildes/diacríticos.
+
+    Los géneros del dataset vienen de TMDB/Google Books con tildes ("Ciencia
+    ficción", "Acción"), pero los perfiles los tipean a mano y no siempre las
+    ponen ("ciencia ficcion", "accion"). Sin esto, esas comparaciones nunca
+    matcheaban y el ranking terminaba ignorando la mayoría de los gustos reales
+    del grupo.
+    """
+    sin_tildes = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
+    return sin_tildes.lower()
+
+
 def _generos_favoritos_para_tipo(perfil: Perfil, tipo: str) -> set[str]:
     generos = (
         perfil.generos_favoritos_peliculas if tipo == "pelicula" else perfil.generos_favoritos_libros
     )
-    return {g.lower() for g in generos}
+    return {_normalizar(g) for g in generos}
 
 
 def _titulos_no_bancados(perfil: Perfil) -> set[str]:
-    return {item.titulo.lower() for item in perfil.no_banca_titulos}
+    return {_normalizar(item.titulo) for item in perfil.no_banca_titulos}
 
 
 def _score_candidato(candidato: dict, perfiles: list[Perfil]) -> float:
-    generos_candidato = {g.lower() for g in (candidato.get("generos") or "").split("|") if g}
+    generos_candidato = {_normalizar(g) for g in (candidato.get("generos") or "").split("|") if g}
     tipo = candidato.get("tipo")
-    titulo = (candidato.get("titulo") or "").lower()
+    titulo = _normalizar(candidato.get("titulo") or "")
 
     score = 0.0
     for perfil in perfiles:
         favoritos = _generos_favoritos_para_tipo(perfil, tipo)
         score += PESO_GENERO_FAVORITO * len(generos_candidato & favoritos)
 
-        no_bancados = {g.lower() for g in perfil.no_banca_generos}
+        no_bancados = {_normalizar(g) for g in perfil.no_banca_generos}
         score += PESO_GENERO_NO_BANCADO * len(generos_candidato & no_bancados)
 
         if titulo in _titulos_no_bancados(perfil):
