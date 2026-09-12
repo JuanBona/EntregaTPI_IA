@@ -59,7 +59,7 @@ def _resumen_candidatos_para_prompt(candidatos: list[dict]) -> str:
 
 
 def _get_llm() -> ChatAnthropic:
-    modelo = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+    modelo = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5")
     return ChatAnthropic(model=modelo, temperature=0.7)
 
 
