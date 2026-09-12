@@ -35,6 +35,7 @@ def _dataframe_a_documentos(df: pd.DataFrame) -> list[Document]:
             "rating": float(fila["rating"]) if pd.notna(fila["rating"]) else None,
             "anio": int(fila["anio"]) if pd.notna(fila["anio"]) else None,
             "autor_director": fila["autor_director"],
+            "sinopsis": fila["sinopsis"]  # NUEVA LÍNEA 
         }
         documentos.append(Document(page_content=contenido, metadata=metadata, id=fila["id"]))
     return documentos
