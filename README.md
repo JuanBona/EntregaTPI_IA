@@ -63,6 +63,22 @@ python -m agent.mediador
 Cada carpeta tiene su propio `README.md` con más detalle (setup, cómo correrla sola,
 y el "contrato" de datos que expone al resto del pipeline).
 
+## Interfaz de prueba/demo (Streamlit)
+
+Para probar el sistema completo con una interfaz web local (editar perfiles + generar
+recomendación con un click), sin usar Colab:
+
+```bash
+streamlit run ui/app.py
+```
+
+Abre automáticamente `http://localhost:8501` en el navegador. Necesita `GOOGLE_API_KEY`
+en el `.env` (ver arriba) y que `data/dataset.csv` exista — el vectorstore se genera
+solo la primera vez que se corre.
+
+Es una herramienta separada de `notebook/` (pensada para desarrollo y para la defensa
+oral), no un entregable del TP.
+
 ## Cargar tu perfil
 
 Copiar `perfiles/ejemplo_perfil.json` a `perfiles/<tu_nombre>.json` y completarlo. Ver
