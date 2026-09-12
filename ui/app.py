@@ -53,12 +53,26 @@ def _cargar_perfiles_con_paths() -> list[tuple[Path, Perfil]]:
 st.title("🎬 Recomendador grupal de películas y libros")
 st.caption("TP2 - Sistemas Inteligentes — editá los perfiles y generá la recomendación del grupo.")
 
-_asegurar_vectorstore()
-dataset = _cargar_dataset()
+try:
+    _asegurar_vectorstore()
+    dataset = _cargar_dataset()
+except Exception as e:
+    st.error(f"No se pudo cargar el dataset o la base vectorial: {e}")
+    st.stop()
+
 opciones_pelicula = generos_disponibles(dataset, tipo="pelicula")
 opciones_libro = generos_disponibles(dataset, tipo="libro")
 
-perfiles_con_paths = _cargar_perfiles_con_paths()
+try:
+    perfiles_con_paths = _cargar_perfiles_con_paths()
+except (RuntimeError, ValueError, KeyError) as e:
+    st.error(f"No se pudieron cargar los perfiles: {e}")
+    st.stop()
+
+if not perfiles_con_paths:
+    st.error("No hay perfiles en perfiles/. Cada integrante debe cargar el suyo.")
+    st.stop()
+
 tabs = st.tabs([perfil.nombre for _, perfil in perfiles_con_paths])
 
 for tab, (path, perfil) in zip(tabs, perfiles_con_paths):
@@ -71,50 +85,50 @@ for tab, (path, perfil) in zip(tabs, perfiles_con_paths):
                 "Géneros favoritos (películas)",
                 options=sorted(set(opciones_pelicula) | set(perfil.generos_favoritos_peliculas)),
                 default=perfil.generos_favoritos_peliculas,
-                key=f"peliculas_generos_{perfil.nombre}",
+                key=f"peliculas_generos_{path.stem}",
             )
             otros_peliculas = st.text_input(
                 "Otros géneros de películas (coma-separados, opcional)",
-                key=f"peliculas_otros_{perfil.nombre}",
+                key=f"peliculas_otros_{path.stem}",
             )
         with col2:
             sel_libros = st.multiselect(
                 "Géneros favoritos (libros)",
                 options=sorted(set(opciones_libro) | set(perfil.generos_favoritos_libros)),
                 default=perfil.generos_favoritos_libros,
-                key=f"libros_generos_{perfil.nombre}",
+                key=f"libros_generos_{path.stem}",
             )
             otros_libros = st.text_input(
                 "Otros géneros de libros (coma-separados, opcional)",
-                key=f"libros_otros_{perfil.nombre}",
+                key=f"libros_otros_{path.stem}",
             )
 
         contenido_texto = st.text_area(
             "Contenido favorito (uno por línea; formato 'Título | tipo', tipo opcional)",
             value=items_a_texto(perfil.contenido_favorito),
-            key=f"contenido_{perfil.nombre}",
+            key=f"contenido_{path.stem}",
         )
 
         sel_no_banca_generos = st.multiselect(
             "Géneros que no banca",
             options=sorted(set(opciones_pelicula) | set(opciones_libro) | set(perfil.no_banca_generos)),
             default=perfil.no_banca_generos,
-            key=f"no_banca_generos_{perfil.nombre}",
+            key=f"no_banca_generos_{path.stem}",
         )
 
         no_banca_titulos_texto = st.text_area(
             "Títulos que no banca (uno por línea; formato 'Título | tipo')",
             value=items_a_texto(perfil.no_banca_titulos),
-            key=f"no_banca_titulos_{perfil.nombre}",
+            key=f"no_banca_titulos_{path.stem}",
         )
 
         notas = st.text_area(
             "Notas libres",
             value=perfil.notas_libres,
-            key=f"notas_{perfil.nombre}",
+            key=f"notas_{path.stem}",
         )
 
-        if st.button("Guardar cambios", key=f"guardar_{perfil.nombre}"):
+        if st.button("Guardar cambios", key=f"guardar_{path.stem}"):
             nuevo_perfil = Perfil(
                 nombre=perfil.nombre,
                 generos_favoritos_peliculas=combinar_generos(sel_peliculas, otros_peliculas),
@@ -138,9 +152,13 @@ if st.button("Generar recomendación grupal", type="primary"):
         )
         st.stop()
 
-    with st.spinner("Buscando candidatos y armando la recomendación..."):
-        perfiles_actuales = [cargar_perfil(p) for p in listar_paths_perfiles()]
-        resultado = recomendar_grupal(perfiles_actuales)
+    try:
+        with st.spinner("Buscando candidatos y armando la recomendación..."):
+            perfiles_actuales = [cargar_perfil(p) for p in listar_paths_perfiles()]
+            resultado = recomendar_grupal(perfiles_actuales)
+    except Exception as e:
+        st.error(f"Falló la llamada al LLM: {e}")
+        st.stop()
 
     st.subheader("Criterio de búsqueda usado")
     st.caption(resultado["criterio_busqueda"])
