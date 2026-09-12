@@ -49,17 +49,22 @@ def cargar_perfil(path: str) -> Perfil:
     )
 
 
+def listar_paths_perfiles(carpeta: str = "perfiles") -> list[str]:
+    """Paths de perfiles reales en `carpeta`, excluyendo ejemplo_perfil.json."""
+    return [
+        path
+        for path in sorted(glob.glob(os.path.join(carpeta, "*.json")))
+        if os.path.basename(path) != "ejemplo_perfil.json"
+    ]
+
+
 def cargar_todos_los_perfiles(carpeta: str = "perfiles") -> list[Perfil]:
     """Carga todos los .json de la carpeta, excepto ejemplo_perfil.json."""
-    perfiles = []
-    for path in sorted(glob.glob(os.path.join(carpeta, "*.json"))):
-        if os.path.basename(path) == "ejemplo_perfil.json":
-            continue
-        perfiles.append(cargar_perfil(path))
+    paths = listar_paths_perfiles(carpeta)
 
-    if not perfiles:
+    if not paths:
         raise RuntimeError(
             f"No se encontró ningún perfil en '{carpeta}/'. "
             "Cada integrante debe copiar perfiles/ejemplo_perfil.json y completarlo."
         )
-    return perfiles
+    return [cargar_perfil(path) for path in paths]
