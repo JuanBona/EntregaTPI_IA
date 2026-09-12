@@ -21,3 +21,6 @@ tqdm>=4.66.0
 
 # Notebook (para desarrollo local del /notebook, Colab ya trae esto)
 jupyter>=1.0.0
+
+# Interfaz de prueba/demo (no se usa en Colab)
+streamlit>=1.38.0
