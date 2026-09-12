@@ -1,18 +1,40 @@
 {
   "nombre": "Lucas",
   "generos_favoritos": {
-    "peliculas": ["ciencia ficcion", "accion", "thriller"],
-    "libros": ["ciencia ficcion", "historia"]
+    "peliculas": [
+      "ciencia ficcion",
+      "accion",
+      "thriller"
+    ],
+    "libros": [
+      "ciencia ficcion",
+      "historia"
+    ]
   },
   "contenido_favorito": [
-    {"titulo": "Interstellar", "tipo": "pelicula"},
-    {"titulo": "Dune", "tipo": "libro"},
-    {"titulo": "The Bourne Identity", "tipo": "pelicula"}
+    {
+      "titulo": "Interstellar",
+      "tipo": "pelicula"
+    },
+    {
+      "titulo": "Dune",
+      "tipo": "libro"
+    },
+    {
+      "titulo": "The Bourne Identity",
+      "tipo": "pelicula"
+    }
   ],
   "no_banca": {
-    "generos": ["romance", "musical"],
+    "generos": [
+      "romance",
+      "musical"
+    ],
     "titulos": [
-      {"titulo": "La La Land", "tipo": "pelicula"}
+      {
+        "titulo": "La La Land",
+        "tipo": "pelicula"
+      }
     ]
   },
   "notas_libres": "me copan las pelis con buena trama y no tan lentas, no banco los dramones lloronas"

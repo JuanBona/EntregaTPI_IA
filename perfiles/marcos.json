@@ -1,19 +1,38 @@
 {
   "nombre": "Marcos",
   "generos_favoritos": {
-    "peliculas": ["comedia", "drama", "biografia"],
-    "libros": ["biografia", "ficcion"]
-  },
-  "contenido_favorito": [
-    {"titulo": "The Grand Budapest Hotel", "tipo": "pelicula"},
-    {"titulo": "Sapiens", "tipo": "libro"},
-    {"titulo": "Little Miss Sunshine", "tipo": "pelicula"}
-  ],
-  "no_banca": {
-    "generos": ["terror"],
-    "titulos": [
-      {"titulo": "Hereditary", "tipo": "pelicula"}
+    "peliculas": [
+      "comedia",
+      "drama",
+      "biografia"
+    ],
+    "libros": [
+      "biografia",
+      "ficcion"
     ]
   },
-  "notas_libres": "busco algo liviano y con onda, si tiene humor mejor, cero terror"
+  "contenido_favorito": [
+    {
+      "titulo": "The Grand Budapest Hotel",
+      "tipo": "pelicula"
+    },
+    {
+      "titulo": "Sapiens",
+      "tipo": "libro"
+    },
+    {
+      "titulo": "Little Miss Sunshine",
+      "tipo": "pelicula"
+    }
+  ],
+  "no_banca": {
+    "generos": [],
+    "titulos": [
+      {
+        "titulo": "Hereditary",
+        "tipo": "pelicula"
+      }
+    ]
+  },
+  "notas_libres": "busco algo liviano y con onda, si tiene humor mejor"
 }
