@@ -4,7 +4,7 @@ al LLM la recomendación final con el tono de prompts/system_prompt.py.
 
 import os
 
-from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from agent.perfil import Perfil, cargar_todos_los_perfiles
 from agent.ranking import rankear_candidatos
@@ -58,9 +58,9 @@ def _resumen_candidatos_para_prompt(candidatos: list[dict]) -> str:
     return "\n".join(lineas)
 
 
-def _get_llm() -> ChatAnthropic:
-    modelo = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5")
-    return ChatAnthropic(model=modelo, temperature=0.7)
+def _get_llm() -> ChatGoogleGenerativeAI:
+    modelo = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    return ChatGoogleGenerativeAI(model=modelo, temperature=0.7)
 
 
 def recomendar_grupal(perfiles: list[Perfil] | None = None) -> dict:

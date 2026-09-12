@@ -24,7 +24,7 @@ ingestion/  →  data/dataset.csv  →  rag/  →  data/chroma/  →  agent/  �
 
 ## Por qué embeddings locales (HuggingFace) y no OpenAI
 
-El stack ya usa Claude (Anthropic) como LLM. Sumar OpenAI *solo* para embeddings agrega:
+El stack ya usa Gemini (Google) como LLM. Sumar OpenAI *solo* para embeddings agrega:
 una API key más para gestionar entre 5 personas, un costo (aunque bajo) por llamada, y un
 punto de falla extra el día de la defensa si no hay internet estable.
 

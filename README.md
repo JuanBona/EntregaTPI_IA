@@ -1,6 +1,6 @@
 # Recomendador grupal de películas y libros
 
-TP2 de Sistemas Inteligentes — sistema de RAG + agente (Langchain + Claude) que cruza
+TP2 de Sistemas Inteligentes — sistema de RAG + agente (Langchain + Gemini) que cruza
 los gustos de 5 personas y devuelve una recomendación final justificada, en tono
 canchero argentino.
 
@@ -40,7 +40,7 @@ cp .env.example .env
 
 Completar `.env` con:
 
-- `ANTHROPIC_API_KEY` — https://console.anthropic.com/
+- `GOOGLE_API_KEY` — gratis en https://aistudio.google.com/apikey
 - `TMDB_API_KEY` — https://www.themoviedb.org/settings/api (gratis)
 - `GOOGLE_BOOKS_API_KEY` — opcional, Google Books funciona sin key con rate limit bajo
 

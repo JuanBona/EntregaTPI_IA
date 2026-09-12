@@ -9,7 +9,7 @@ Google Colab, integrando los 4 módulos anteriores.
    `feature/agent` y `feature/prompts`.
 2. Confirmar que `data/dataset.csv` está commiteado (sale de `/ingestion`).
 3. Abrir esta notebook en Colab (`archivo > subir notebook` o clonando el repo).
-4. Cargar `ANTHROPIC_API_KEY` y `TMDB_API_KEY` en los Secrets de Colab (ícono de llave).
+4. Cargar `GOOGLE_API_KEY` y `TMDB_API_KEY` en los Secrets de Colab (ícono de llave).
 5. Reemplazar la URL de `git clone` en la celda 1 por la del repo real del equipo.
 6. Correr todas las celdas en orden y completar la sección 6 (casos de prueba) con
    corridas reales para mostrar en la defensa oral.

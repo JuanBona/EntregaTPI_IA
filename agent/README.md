@@ -6,7 +6,8 @@ recomendación final al LLM con el tono de `/prompts`.
 
 ## Setup
 
-Necesita `ANTHROPIC_API_KEY` en el `.env`, y que `/rag` ya haya corrido
+Necesita `GOOGLE_API_KEY` en el `.env` (gratis en https://aistudio.google.com/apikey),
+y que `/rag` ya haya corrido
 `python -m rag.vectorstore` al menos una vez (o sea, que exista `data/chroma/`).
 
 ## Correr
@@ -30,7 +31,7 @@ Esto carga automáticamente todos los `perfiles/*.json` que haya en el repo.
      una sola query de texto (sin incluir los "no banca" — ver el docstring del porqué).
   2. Llama a `rag.retriever(criterio, k=8)`.
   3. Rankea con `ranking.rankear_candidatos()` y se queda con el top 3.
-  4. Le pasa perfiles + top 3 al LLM (Claude) con el system prompt de `/prompts` y
+  4. Le pasa perfiles + top 3 al LLM (Gemini) con el system prompt de `/prompts` y
      devuelve la recomendación final en texto.
 
 ## Contrato con /notebook
