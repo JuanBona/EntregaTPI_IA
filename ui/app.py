@@ -6,6 +6,7 @@ No se usa en Colab (ver notebook/ para el entregable de Colab).
 
 import os
 import sys
+import uuid
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -144,22 +145,39 @@ for tab, (path, perfil) in zip(tabs, perfiles_con_paths):
 st.divider()
 st.header("Recomendación grupal")
 
-if st.button("Generar recomendación grupal", type="primary"):
-    if not os.getenv("GOOGLE_API_KEY"):
-        st.error(
-            "Falta GOOGLE_API_KEY. Completá tu .env (ver .env.example) con una key "
-            "gratis de https://aistudio.google.com/apikey y reiniciá la app."
-        )
-        st.stop()
+# Un id de conversación por pestaña/sesión del navegador, para que la memoria del
+# agente (RunnableWithMessageHistory en agent/mediador.py) no se mezcle entre gente
+# distinta usando la demo al mismo tiempo.
+if "chat_session_id" not in st.session_state:
+    st.session_state.chat_session_id = str(uuid.uuid4())
+if "resultado" not in st.session_state:
+    st.session_state.resultado = None
 
+if not os.getenv("GOOGLE_API_KEY"):
+    st.error(
+        "Falta GOOGLE_API_KEY. Completá tu .env (ver .env.example) con una key "
+        "gratis de https://aistudio.google.com/apikey y reiniciá la app."
+    )
+    st.stop()
+
+
+def _pedir_recomendacion(mensaje: str | None = None) -> None:
+    kwargs = {"session_id": st.session_state.chat_session_id}
+    if mensaje:
+        kwargs["mensaje"] = mensaje
     try:
         with st.spinner("Buscando candidatos y armando la recomendación..."):
             perfiles_actuales = [cargar_perfil(p) for p in listar_paths_perfiles()]
-            resultado = recomendar_grupal(perfiles_actuales)
+            st.session_state.resultado = recomendar_grupal(perfiles_actuales, **kwargs)
     except Exception as e:
         st.error(f"Falló la llamada al LLM: {e}")
-        st.stop()
 
+
+if st.button("Generar recomendación grupal", type="primary"):
+    _pedir_recomendacion()
+
+resultado = st.session_state.resultado
+if resultado:
     st.subheader("Criterio de búsqueda usado")
     st.caption(resultado["criterio_busqueda"])
 
@@ -168,3 +186,16 @@ if st.button("Generar recomendación grupal", type="primary"):
 
     st.subheader("Recomendación final")
     st.markdown(resultado["recomendacion"])
+
+    st.divider()
+    st.caption(
+        "¿Querés otra opción o algo distinto? El agente tiene memoria de esta "
+        "conversación, así que tiene en cuenta lo que ya te recomendó."
+    )
+    with st.form("repregunta", clear_on_submit=True):
+        repregunta = st.text_input(
+            "Pedile algo puntual al agente (ej. \"dame otra opción\", \"algo más liviano\")"
+        )
+        if st.form_submit_button("Pedir de nuevo") and repregunta.strip():
+            _pedir_recomendacion(repregunta.strip())
+            st.rerun()
