@@ -32,6 +32,23 @@ def obtener_generos() -> dict[int, str]:
     return {g["id"]: g["name"] for g in resp.json()["genres"]}
 
 
+def obtener_director(pelicula_id: int) -> str | None:
+    """Director(es) de una película, vía /movie/{id}/credits.
+
+    /discover/movie (usado en buscar_peliculas) no trae esta info; hace falta un
+    request aparte por película, por eso se llama solo para backfill (ver
+    ingestion/backfill_datos_faltantes.py), no en la ingesta masiva.
+    """
+    resp = requests.get(
+        f"{TMDB_BASE_URL}/movie/{pelicula_id}/credits",
+        params={"api_key": _api_key()},
+        timeout=15,
+    )
+    resp.raise_for_status()
+    directores = [c["name"] for c in resp.json().get("crew", []) if c.get("job") == "Director"]
+    return ", ".join(directores) if directores else None
+
+
 def buscar_peliculas(paginas: int = 5, idioma: str = "es-AR") -> list[dict]:
     """Trae películas populares/mejor rankeadas de TMDB, `paginas` páginas de 20 c/u.
 

@@ -8,6 +8,16 @@ PESO_GENERO_FAVORITO = 1.0
 PESO_GENERO_NO_BANCADO = -2.0
 PESO_TITULO_NO_BANCADO = -3.0
 PESO_RATING = 0.1  # rating típico 0-10, así aporta hasta +1 al score
+PESO_SEMANTICO = 0.3  # score del retriever es una distancia (más bajo = más parecido)
+
+# Los perfiles tipean el género de películas ("thriller") o de libros ("policial") como
+# les sale, pero el dataset los etiqueta con el término que usa TMDB/Google Books
+# ("Suspense", "Crimen"). Sin este mapeo esos géneros nunca matcheaban aunque el
+# usuario los haya puesto bien.
+_SINONIMOS_GENERO = {
+    "thriller": "suspense",
+    "policial": "crimen",
+}
 
 
 def _normalizar(texto: str) -> str:
@@ -23,11 +33,17 @@ def _normalizar(texto: str) -> str:
     return sin_tildes.lower()
 
 
+def _normalizar_genero(genero: str) -> str:
+    """`_normalizar` más el mapeo de sinónimos entre géneros de libro y de película."""
+    normalizado = _normalizar(genero)
+    return _SINONIMOS_GENERO.get(normalizado, normalizado)
+
+
 def _generos_favoritos_para_tipo(perfil: Perfil, tipo: str) -> set[str]:
     generos = (
         perfil.generos_favoritos_peliculas if tipo == "pelicula" else perfil.generos_favoritos_libros
     )
-    return {_normalizar(g) for g in generos}
+    return {_normalizar_genero(g) for g in generos}
 
 
 def _titulos_no_bancados(perfil: Perfil) -> set[str]:
@@ -35,7 +51,7 @@ def _titulos_no_bancados(perfil: Perfil) -> set[str]:
 
 
 def _score_candidato(candidato: dict, perfiles: list[Perfil]) -> float:
-    generos_candidato = {_normalizar(g) for g in (candidato.get("generos") or "").split("|") if g}
+    generos_candidato = {_normalizar_genero(g) for g in (candidato.get("generos") or "").split("|") if g}
     tipo = candidato.get("tipo")
     titulo = _normalizar(candidato.get("titulo") or "")
 
@@ -44,7 +60,7 @@ def _score_candidato(candidato: dict, perfiles: list[Perfil]) -> float:
         favoritos = _generos_favoritos_para_tipo(perfil, tipo)
         score += PESO_GENERO_FAVORITO * len(generos_candidato & favoritos)
 
-        no_bancados = {_normalizar(g) for g in perfil.no_banca_generos}
+        no_bancados = {_normalizar_genero(g) for g in perfil.no_banca_generos}
         score += PESO_GENERO_NO_BANCADO * len(generos_candidato & no_bancados)
 
         if titulo in _titulos_no_bancados(perfil):
@@ -53,6 +69,10 @@ def _score_candidato(candidato: dict, perfiles: list[Perfil]) -> float:
     rating = candidato.get("rating")
     if rating:
         score += PESO_RATING * rating
+
+    distancia_semantica = candidato.get("score")
+    if distancia_semantica is not None:
+        score -= PESO_SEMANTICO * distancia_semantica
 
     return score
 

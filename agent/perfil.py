@@ -82,7 +82,7 @@ def validar_generos_contra_dataset(perfiles: list[Perfil], dataset_csv_path: str
     """Avisa por consola qué géneros de los perfiles no existen en el dataset (no matchean nunca).
 
     No levanta excepción: es un chequeo informativo para correr una vez al cargar los
-    perfiles, no una validación bloqueante (ver P2/P14 en la revisión del repo).
+    perfiles, no una validación bloqueante.
     """
     with open(dataset_csv_path, encoding="utf-8") as f:
         filas = list(csv.DictReader(f))

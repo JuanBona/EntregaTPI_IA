@@ -23,7 +23,7 @@ def construir_criterio_busqueda(perfiles: list[Perfil]) -> str:
 
     Estrategia simple (fácil de explicar en la defensa): concatenar géneros favoritos
     y títulos de todos, dejando que el embedding semántico encuentre el punto medio
-    del grupo. Los "no banca" y las `notas_libres` NO entran acá — se filtran/usan
+    del grupo. Los "no banca" y las `notas_libres` NO entran acá, se filtran/usan
     después (ranking.py y el prompt del LLM), para no confundir al embedding con
     negaciones (los modelos de embeddings no manejan bien la negación semántica,
     ej. "no me gusta terror" puede quedar cerca de "terror" en el espacio vectorial,

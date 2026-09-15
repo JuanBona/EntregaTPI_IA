@@ -45,6 +45,42 @@ def test_titulo_no_banca_con_tilde_matchea_perfil_sin_tilde():
     assert score == -3.0
 
 
+def test_genero_favorito_thriller_matchea_candidato_suspense():
+    """Regresión: los perfiles tipean 'thriller' (cine) o 'policial' (libros), pero
+    el dataset etiqueta esos mismos géneros como 'Suspense' y 'Crimen'."""
+    perfil = _perfil("Test", peliculas_fav=["thriller"])
+    candidato = {"tipo": "pelicula", "generos": "Suspense|Drama", "titulo": "X", "rating": 0}
+
+    score = _score_candidato(candidato, [perfil])
+
+    assert score == 1.0
+
+
+def test_score_semantico_del_retriever_desempata_entre_candidatos_parejos():
+    """Regresión: el ranking ignoraba el 'score' (distancia) que trae rag.retriever(),
+    así que dos candidatos con el mismo match de género quedaban empatados aunque uno
+    fuera semánticamente mucho más relevante que el otro."""
+    perfil = _perfil("Test", peliculas_fav=["terror"])
+    candidato_cercano = {
+        "tipo": "pelicula",
+        "titulo": "Cercano",
+        "generos": "Terror",
+        "rating": 0,
+        "score": 3.0,
+    }
+    candidato_lejano = {
+        "tipo": "pelicula",
+        "titulo": "Lejano",
+        "generos": "Terror",
+        "rating": 0,
+        "score": 9.0,
+    }
+
+    rankeados = rankear_candidatos([candidato_lejano, candidato_cercano], [perfil])
+
+    assert rankeados[0]["titulo"] == "Cercano"
+
+
 def test_rankear_candidatos_prefiere_match_real_de_genero_por_sobre_generico():
     """Regresión: 'ciencia ficcion' (perfil, sin tilde) no matcheaba 'Ciencia ficción'
     (dataset, con tilde), lo que hacia que un candidato generico ganara siempre aunque

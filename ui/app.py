@@ -51,7 +51,7 @@ def _cargar_perfiles_con_paths() -> list[tuple[Path, Perfil]]:
 
 
 st.title("🎬 Recomendador grupal de películas y libros")
-st.caption("TP2 - Sistemas Inteligentes — editá los perfiles y generá la recomendación del grupo.")
+st.caption("TP2 - Sistemas Inteligentes, editá los perfiles y generá la recomendación del grupo.")
 
 try:
     _asegurar_vectorstore()
@@ -88,7 +88,7 @@ for tab, (path, perfil) in zip(tabs, perfiles_con_paths):
                 key=f"peliculas_generos_{path.stem}",
             )
             otros_peliculas = st.text_input(
-                "Otros géneros de películas (coma-separados, opcional)",
+                "Otros géneros de películas (separados por coma, opcional)",
                 key=f"peliculas_otros_{path.stem}",
             )
         with col2:
@@ -99,7 +99,7 @@ for tab, (path, perfil) in zip(tabs, perfiles_con_paths):
                 key=f"libros_generos_{path.stem}",
             )
             otros_libros = st.text_input(
-                "Otros géneros de libros (coma-separados, opcional)",
+                "Otros géneros de libros (separados por coma, opcional)",
                 key=f"libros_otros_{path.stem}",
             )
 

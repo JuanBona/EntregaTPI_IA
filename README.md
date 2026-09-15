@@ -1,11 +1,11 @@
 # Recomendador grupal de películas y libros
 
-TP2 de Sistemas Inteligentes — sistema de RAG + agente (Langchain + Gemini) que cruza
+TP2 de Sistemas Inteligentes, sistema de RAG + agente (Langchain + Gemini) que cruza
 los gustos de 5 personas y devuelve una recomendación final justificada, en tono
 canchero argentino.
 
 Ver `docs/DISENO.md` para el detalle de todas las decisiones de diseño (qué se eligió
-y por qué) — es material directo para la defensa oral.
+y por qué), es material directo para la defensa oral.
 
 ## Arquitectura
 
@@ -17,11 +17,11 @@ ingestion/  →  data/dataset.csv  →  rag/  →  data/chroma/  →  agent/  �
 
 | Carpeta | Qué hace | Quién la toca |
 |---|---|---|
-| `ingestion/` | Trae y limpia datos de TMDB + Google Books → `data/dataset.csv` | Persona 1 |
-| `rag/` | Embeddings + ChromaDB, expone `retriever(query, k)` | Persona 2 |
-| `agent/` | Carga perfiles, cruza gustos, llama al retriever, rankea | Persona 3 |
-| `prompts/` | Personalidad "canchero argentino" del agente | Persona 4 |
-| `notebook/` | Notebook final para Colab que integra todo | Persona 5 |
+| `ingestion/` | Trae y limpia datos de TMDB + Google Books → `data/dataset.csv` | Lucas |
+| `rag/` | Embeddings + ChromaDB, expone `retriever(query, k)` | Rafa |
+| `agent/` | Carga perfiles, cruza gustos, llama al retriever, rankea | Juan |
+| `prompts/` | Personalidad "canchero argentino" del agente | Marcos |
+| `notebook/` | Notebook final para Colab que integra todo | Bruno |
 | `perfiles/` | Un `.json` por integrante con sus gustos | Los 5 |
 
 Cada módulo se desarrolla y se prueba **solo**, sin depender de que los otros ya estén
@@ -40,9 +40,9 @@ cp .env.example .env
 
 Completar `.env` con:
 
-- `GOOGLE_API_KEY` — gratis en https://aistudio.google.com/apikey
-- `TMDB_API_KEY` — https://www.themoviedb.org/settings/api (gratis)
-- `GOOGLE_BOOKS_API_KEY` — opcional, Google Books funciona sin key con rate limit bajo
+- `GOOGLE_API_KEY`, gratis en https://aistudio.google.com/apikey
+- `TMDB_API_KEY`, https://www.themoviedb.org/settings/api (gratis)
+- `GOOGLE_BOOKS_API_KEY`, opcional, Google Books funciona sin key con rate limit bajo
 
 ## Correr cada módulo por separado
 
@@ -73,7 +73,7 @@ streamlit run ui/app.py
 ```
 
 Abre automáticamente `http://localhost:8501` en el navegador. Necesita `GOOGLE_API_KEY`
-en el `.env` (ver arriba) y que `data/dataset.csv` exista — el vectorstore se genera
+en el `.env` (ver arriba) y que `data/dataset.csv` exista, el vectorstore se genera
 solo la primera vez que se corre.
 
 Es una herramienta separada de `notebook/` (pensada para desarrollo y para la defensa
@@ -116,6 +116,7 @@ al final una vez que las otras 4 ramas ya están en `main`.
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
+├── resultados_pruebas_retriever.txt  # corridas de rag.retriever() contra el dataset real
 ├── docs/
 │   └── DISENO.md          # decisiones de diseño, material para la defensa
 ├── perfiles/
@@ -127,6 +128,7 @@ al final una vez que las otras 4 ramas ya están en `main`.
 │   ├── clean.py
 │   ├── schema.py
 │   ├── build_dataset.py
+│   ├── backfill_datos_faltantes.py
 │   └── README.md
 ├── rag/
 │   ├── vectorstore.py
