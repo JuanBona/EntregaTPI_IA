@@ -1,11 +1,11 @@
 # Recomendador grupal de películas y libros
 
-TP2 de Sistemas Inteligentes — sistema de RAG + agente (Langchain + Gemini) que cruza
+TP2 de Sistemas Inteligentes, sistema de RAG + agente (Langchain + Gemini) que cruza
 los gustos de 5 personas y devuelve una recomendación final justificada, en tono
 canchero argentino.
 
 Ver `docs/DISENO.md` para el detalle de todas las decisiones de diseño (qué se eligió
-y por qué) — es material directo para la defensa oral.
+y por qué), es material directo para la defensa oral.
 
 ## Arquitectura
 
@@ -17,15 +17,45 @@ ingestion/  →  data/dataset.csv  →  rag/  →  data/chroma/  →  agent/  �
 
 | Carpeta | Qué hace | Quién la toca |
 |---|---|---|
-| `ingestion/` | Trae y limpia datos de TMDB + Google Books → `data/dataset.csv` | Persona 1 |
-| `rag/` | Embeddings + ChromaDB, expone `retriever(query, k)` | Persona 2 |
-| `agent/` | Carga perfiles, cruza gustos, llama al retriever, rankea | Persona 3 |
-| `prompts/` | Personalidad "canchero argentino" del agente | Persona 4 |
-| `notebook/` | Notebook final para Colab que integra todo | Persona 5 |
+| `ingestion/` | Trae y limpia datos de TMDB + Google Books → `data/dataset.csv` | Lucas |
+| `rag/` | Embeddings + ChromaDB, expone `retriever(query, k)` | Rafa |
+| `agent/` | Carga perfiles, cruza gustos, llama al retriever, rankea | Juan |
+| `prompts/` | Personalidad "canchero argentino" del agente | Marcos |
+| `notebook/` | Notebook final para Colab que integra todo | Bruno |
 | `perfiles/` | Un `.json` por integrante con sus gustos | Los 5 |
 
 Cada módulo se desarrolla y se prueba **solo**, sin depender de que los otros ya estén
 terminados (ver el "Correr cada módulo por separado" de cada README).
+
+## Cómo funciona el sistema, paso a paso
+
+1. Cada integrante completa su perfil en `perfiles/<nombre>.json`: géneros favoritos
+   (separados por película y libro), contenido que le gustó, géneros/títulos que no
+   banca, y notas libres en texto natural. Ver `perfiles/README.md`.
+2. `agent/mediador.py` (función `recomendar_grupal()`) arranca cargando todos los
+   perfiles y arma un único criterio de búsqueda combinando los géneros y títulos
+   favoritos de los 5 (`construir_criterio_busqueda()`). Los "no banca" y las notas
+   libres **no** entran acá a propósito: los modelos de embeddings no manejan bien la
+   negación ("no me gusta terror" puede quedar cerca de "terror"), así que esas
+   negaciones se dejan para después.
+3. Ese criterio se manda a `rag.retriever(query, k)`, que busca por similitud semántica
+   sobre los ~276 ítems de `data/dataset.csv` (películas de TMDB + libros de Google
+   Books) ya embeddeados en ChromaDB (`data/chroma/`, se genera local, no se commitea),
+   y devuelve los `k` candidatos más parecidos.
+4. `agent/ranking.py` reordena esos candidatos según qué tan bien le cierran a los 5
+   perfiles **juntos**: suma puntos por cada género favorito que matchea, resta por
+   género o título que alguien no banca, y también pesa el rating y el score semántico
+   que ya trajo el retriever (para no perder esa señal). Incluye un mapeo de sinónimos
+   (ej. "thriller" ↔ "Suspense", "policial" ↔ "Crimen") porque los perfiles y el
+   dataset no siempre usan la misma palabra para lo mismo.
+5. Los top candidatos rankeados, junto con el resumen de los 5 perfiles, se le pasan a
+   una chain de LangChain (`ChatPromptTemplate` de `prompts/system_prompt.py` + Gemini,
+   con `RunnableWithMessageHistory` para tener memoria de conversación) que devuelve la
+   recomendación final: una sola opción, justificada, en tono argentino, sin inventar
+   datos que no estén en perfiles o candidatos.
+6. Todo esto se prueba módulo por módulo en `.py` (ver `tests/`), se puede probar
+   interactivamente con la interfaz Streamlit (`ui/app.py`), y se integra al final en
+   `notebook/TP_recomendador_grupal.ipynb`, el entregable para Colab.
 
 ## Instalación
 
@@ -40,9 +70,9 @@ cp .env.example .env
 
 Completar `.env` con:
 
-- `GOOGLE_API_KEY` — gratis en https://aistudio.google.com/apikey
-- `TMDB_API_KEY` — https://www.themoviedb.org/settings/api (gratis)
-- `GOOGLE_BOOKS_API_KEY` — opcional, Google Books funciona sin key con rate limit bajo
+- `GOOGLE_API_KEY`, gratis en https://aistudio.google.com/apikey
+- `TMDB_API_KEY`, https://www.themoviedb.org/settings/api (gratis)
+- `GOOGLE_BOOKS_API_KEY`, opcional, Google Books funciona sin key con rate limit bajo
 
 ## Correr cada módulo por separado
 
@@ -73,7 +103,7 @@ streamlit run ui/app.py
 ```
 
 Abre automáticamente `http://localhost:8501` en el navegador. Necesita `GOOGLE_API_KEY`
-en el `.env` (ver arriba) y que `data/dataset.csv` exista — el vectorstore se genera
+en el `.env` (ver arriba) y que `data/dataset.csv` exista, el vectorstore se genera
 solo la primera vez que se corre.
 
 Es una herramienta separada de `notebook/` (pensada para desarrollo y para la defensa
@@ -112,38 +142,47 @@ al final una vez que las otras 4 ramas ya están en `main`.
 
 ```
 .
-├── README.md
-├── requirements.txt
-├── .env.example
+├── README.md                          # este archivo
+├── requirements.txt                   # dependencias con versiones fijas
+├── .env.example                       # plantilla de API keys y config (copiar a .env)
 ├── .gitignore
+├── resultados_pruebas_retriever.txt   # corridas de rag.retriever() contra el dataset real
 ├── docs/
-│   └── DISENO.md          # decisiones de diseño, material para la defensa
+│   └── DISENO.md                      # decisiones de diseño, material para la defensa
 ├── perfiles/
-│   ├── ejemplo_perfil.json
-│   └── README.md
+│   ├── ejemplo_perfil.json            # plantilla para copiar como perfiles/<nombre>.json
+│   └── README.md                      # esquema de los campos del perfil
 ├── ingestion/
-│   ├── tmdb_client.py
-│   ├── google_books_client.py
-│   ├── clean.py
-│   ├── schema.py
-│   ├── build_dataset.py
+│   ├── tmdb_client.py                 # pega contra TMDB: películas y (backfill) director
+│   ├── google_books_client.py         # pega contra Google Books: libros y (backfill) categorías
+│   ├── clean.py                       # normaliza ambas fuentes al esquema común
+│   ├── schema.py                      # columnas del dataset final y generador de id
+│   ├── build_dataset.py               # orquesta la ingesta y escribe data/dataset.csv
+│   ├── backfill_datos_faltantes.py    # completa director/géneros que la ingesta inicial no trae
 │   └── README.md
 ├── rag/
-│   ├── vectorstore.py
-│   ├── retriever.py
+│   ├── vectorstore.py                 # arma/carga los embeddings en ChromaDB
+│   ├── retriever.py                   # retriever(query, k, tipo) que usa agent/
 │   └── README.md
 ├── agent/
-│   ├── perfil.py
-│   ├── ranking.py
-│   ├── mediador.py
+│   ├── perfil.py                      # dataclass Perfil, carga de perfiles/*.json, validación de géneros
+│   ├── ranking.py                     # rankea candidatos según afinidad con los 5 perfiles
+│   ├── mediador.py                    # recomendar_grupal(): orquesta todo el flujo (chain LCEL + memoria)
 │   └── README.md
 ├── prompts/
-│   ├── system_prompt.py
-│   ├── ejemplos_tono.md
+│   ├── system_prompt.py               # personalidad del agente y el ChatPromptTemplate (LCEL)
+│   ├── ejemplos_tono.md               # ejemplos de respuestas buenas/malas
 │   └── README.md
 ├── notebook/
-│   ├── TP_recomendador_grupal.ipynb
+│   ├── TP_recomendador_grupal.ipynb   # entregable final para Colab
 │   └── README.md
-└── data/                  # generado en runtime, no se commitea /chroma
-    └── dataset.csv        # sí se commitea, para que el equipo no necesite las API keys
+├── ui/
+│   ├── app.py                         # interfaz Streamlit: editar perfiles y generar recomendación
+│   ├── perfil_forms.py                # conversión perfil <-> formulario web
+│   └── __init__.py
+├── tests/
+│   ├── agent/                         # tests de perfil.py y ranking.py
+│   └── ui/                            # tests de perfil_forms.py
+└── data/                              # generado en runtime, no se commitea /chroma
+    └── dataset.csv                    # sí se commitea, para que el equipo no necesite las API keys
 ```

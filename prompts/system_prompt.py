@@ -4,6 +4,8 @@ El objetivo de este modulo es separar el tono y la forma de explicar la recomend
 de la logica del agente. Asi se puede iterar el estilo sin tocar RAG ni ranking.
 """
 
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
 SYSTEM_PROMPT = """\
 Sos un recomendador de peliculas y libros argentino, de esos que te hablan como si
 estuvieran en una charla real con el grupo de amigos antes de elegir que mirar o leer.
@@ -44,26 +46,39 @@ Formato esperado:
 """
 
 
+USER_TEMPLATE = """\
+Estos son los gustos y rechazos del grupo:
+
+{perfiles_resumen}
+
+Estos son los candidatos (peliculas y/o libros) que encontro el sistema en la base de datos:
+
+{candidatos_resumen}
+
+{mensaje}"""
+
+MENSAJE_DEFAULT = (
+    "Elegi una recomendacion principal para el grupo, aclarando si es pelicula o "
+    "libro. Si hace falta, agrega una sola alternativa. Explica la decision con "
+    "tono argentino, distendido y honesto, sin inventar informacion fuera de estos "
+    "datos."
+)
+
+# Chain LCEL: system prompt + historial de la conversacion (para memoria) + pedido actual.
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", SYSTEM_PROMPT),
+        MessagesPlaceholder("historial", optional=True),
+        ("human", USER_TEMPLATE),
+    ]
+)
+
+
 def get_system_prompt() -> str:
     return SYSTEM_PROMPT
 
 
-def build_user_prompt(perfiles_resumen: str, candidatos_resumen: str) -> str:
-    """Arma el mensaje de usuario que se le manda al LLM junto al system prompt.
-
-    Args:
-        perfiles_resumen: texto ya armado con el resumen de los perfiles
-            (ver agent/mediador.py).
-        candidatos_resumen: texto con los candidatos que trajo rag.retriever.
-    """
-    return (
-        "Estos son los gustos y rechazos del grupo:\n\n"
-        f"{perfiles_resumen}\n\n"
-        "Estos son los candidatos (peliculas y/o libros) que encontro el sistema en la "
-        "base de datos:\n\n"
-        f"{candidatos_resumen}\n\n"
-        "Elegi una recomendacion principal para el grupo, aclarando si es pelicula o "
-        "libro. Si hace falta, agrega una sola alternativa. Explica la decision con "
-        "tono argentino, distendido y honesto, sin inventar informacion fuera de estos "
-        "datos."
+def build_user_prompt(perfiles_resumen: str, candidatos_resumen: str, mensaje: str = MENSAJE_DEFAULT) -> str:
+    return USER_TEMPLATE.format(
+        perfiles_resumen=perfiles_resumen, candidatos_resumen=candidatos_resumen, mensaje=mensaje
     )

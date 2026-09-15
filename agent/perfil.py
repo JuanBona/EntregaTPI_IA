@@ -1,8 +1,10 @@
 """Carga y valida los perfiles de perfiles/*.json. Ver perfiles/README.md para el esquema."""
 
+import csv
 import glob
 import json
 import os
+import unicodedata
 from dataclasses import dataclass, field
 
 
@@ -68,3 +70,33 @@ def cargar_todos_los_perfiles(carpeta: str = "perfiles") -> list[Perfil]:
             "Cada integrante debe copiar perfiles/ejemplo_perfil.json y completarlo."
         )
     return [cargar_perfil(path) for path in paths]
+
+
+def _normalizar(texto: str) -> str:
+    """Minúsculas y sin tildes, igual que agent/ranking.py, para comparar como compara el ranking."""
+    sin_tildes = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
+    return sin_tildes.lower()
+
+
+def validar_generos_contra_dataset(perfiles: list[Perfil], dataset_csv_path: str = "data/dataset.csv") -> None:
+    """Avisa por consola qué géneros de los perfiles no existen en el dataset (no matchean nunca).
+
+    No levanta excepción: es un chequeo informativo para correr una vez al cargar los
+    perfiles, no una validación bloqueante.
+    """
+    with open(dataset_csv_path, encoding="utf-8") as f:
+        filas = list(csv.DictReader(f))
+    generos_dataset = {
+        _normalizar(g.strip())
+        for fila in filas
+        for g in (fila.get("generos") or "").split("|")
+        if g.strip()
+    }
+
+    for perfil in perfiles:
+        generos_perfil = (
+            perfil.generos_favoritos_peliculas + perfil.generos_favoritos_libros + perfil.no_banca_generos
+        )
+        for genero in generos_perfil:
+            if _normalizar(genero) not in generos_dataset:
+                print(f"ojo: el género '{genero}' de {perfil.nombre} no existe en el dataset")

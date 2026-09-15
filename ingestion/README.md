@@ -23,11 +23,15 @@ python -m ingestion.build_dataset --paginas-tmdb 10 --resultados-libros 30 --out
 
 ## Archivos
 
-- `tmdb_client.py` — pega contra la API de TMDB, trae películas populares con género.
-- `google_books_client.py` — pega contra Google Books, busca libros por género/tema.
-- `clean.py` — normaliza ambas fuentes al esquema común y deduplica.
-- `schema.py` — columnas del dataset final y generador de `id` estable.
-- `build_dataset.py` — orquesta todo y escribe `data/dataset.csv`.
+- `tmdb_client.py`: pega contra la API de TMDB, trae películas populares con género.
+- `google_books_client.py`: pega contra Google Books, busca libros por género/tema.
+- `clean.py`: normaliza ambas fuentes al esquema común y deduplica.
+- `schema.py`: columnas del dataset final y generador de `id` estable.
+- `build_dataset.py`: orquesta todo y escribe `data/dataset.csv`.
+- `backfill_datos_faltantes.py`: completa datos que `build_dataset.py` no trae de
+  entrada (director de películas, géneros reales de libros), pegando un request extra
+  por ítem con el `fuente_id` ya guardado. Ver `docs/DISENO.md` (Dificultades
+  encontradas) para el detalle.
 
 ## Al terminar
 

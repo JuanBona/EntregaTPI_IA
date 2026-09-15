@@ -4,11 +4,14 @@ al LLM la recomendación final con el tono de prompts/system_prompt.py.
 
 import os
 
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from agent.perfil import Perfil, cargar_todos_los_perfiles
 from agent.ranking import rankear_candidatos
-from prompts.system_prompt import build_user_prompt, get_system_prompt
+from prompts.system_prompt import MENSAJE_DEFAULT, prompt
 from rag.retriever import retriever
 
 K_CANDIDATOS_RAG = 8
@@ -19,19 +22,18 @@ def construir_criterio_busqueda(perfiles: list[Perfil]) -> str:
     """Combina los gustos de los 5 perfiles en una sola query de texto para el retriever.
 
     Estrategia simple (fácil de explicar en la defensa): concatenar géneros favoritos
-    y notas libres de todos, dejando que el embedding semántico encuentre el punto
-    medio del grupo. Los "no banca" NO entran acá — se filtran después en ranking.py,
-    para no confundir al embedding con negaciones (los modelos de embeddings no
-    manejan bien la negación semántica, ej. "no me gusta terror" puede quedar cerca
-    de "terror" en el espacio vectorial).
+    y títulos de todos, dejando que el embedding semántico encuentre el punto medio
+    del grupo. Los "no banca" y las `notas_libres` NO entran acá, se filtran/usan
+    después (ranking.py y el prompt del LLM), para no confundir al embedding con
+    negaciones (los modelos de embeddings no manejan bien la negación semántica,
+    ej. "no me gusta terror" puede quedar cerca de "terror" en el espacio vectorial,
+    y las notas libres suelen tener negaciones mezcladas con gustos positivos).
     """
     partes = []
     for perfil in perfiles:
         partes.extend(perfil.generos_favoritos_peliculas)
         partes.extend(perfil.generos_favoritos_libros)
         partes.extend(item.titulo for item in perfil.contenido_favorito)
-        if perfil.notas_libres:
-            partes.append(perfil.notas_libres)
 
     return ", ".join(partes)
 
@@ -59,15 +61,30 @@ def _resumen_candidatos_para_prompt(candidatos: list[dict]) -> str:
 
 
 def _get_llm() -> ChatGoogleGenerativeAI:
-    modelo = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    modelo = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
     return ChatGoogleGenerativeAI(model=modelo, temperature=0.7)
 
 
-def recomendar_grupal(perfiles: list[Perfil] | None = None) -> dict:
+# Memoria en RAM por session_id (alcanza para el TP; no hace falta persistirla).
+_historiales: dict[str, InMemoryChatMessageHistory] = {}
+
+
+def _historial(session_id: str) -> InMemoryChatMessageHistory:
+    return _historiales.setdefault(session_id, InMemoryChatMessageHistory())
+
+
+def recomendar_grupal(
+    perfiles: list[Perfil] | None = None,
+    mensaje: str = MENSAJE_DEFAULT,
+    session_id: str = "default",
+) -> dict:
     """Función principal del módulo. Devuelve {recomendacion, candidatos_rankeados}.
 
     Args:
         perfiles: si no se pasa, carga automáticamente todos los perfiles/*.json.
+        mensaje: pedido puntual ("dame otra opción", etc). Por default pide la
+            recomendación inicial.
+        session_id: separa el historial de memoria entre conversaciones distintas.
     """
     perfiles = perfiles or cargar_todos_los_perfiles()
 
@@ -75,20 +92,21 @@ def recomendar_grupal(perfiles: list[Perfil] | None = None) -> dict:
     candidatos = retriever(criterio, k=K_CANDIDATOS_RAG)
     candidatos_rankeados = rankear_candidatos(candidatos, perfiles)[:K_CANDIDATOS_FINALES]
 
-    llm = _get_llm()
-    mensaje_usuario = build_user_prompt(
-        perfiles_resumen=_resumen_perfiles_para_prompt(perfiles),
-        candidatos_resumen=_resumen_candidatos_para_prompt(candidatos_rankeados),
+    chain = prompt | _get_llm() | StrOutputParser()
+    chain_con_memoria = RunnableWithMessageHistory(
+        chain, _historial, input_messages_key="mensaje", history_messages_key="historial"
     )
-    respuesta = llm.invoke(
-        [
-            {"role": "system", "content": get_system_prompt()},
-            {"role": "user", "content": mensaje_usuario},
-        ]
+    texto = chain_con_memoria.invoke(
+        {
+            "perfiles_resumen": _resumen_perfiles_para_prompt(perfiles),
+            "candidatos_resumen": _resumen_candidatos_para_prompt(candidatos_rankeados),
+            "mensaje": mensaje,
+        },
+        config={"configurable": {"session_id": session_id}},
     )
 
     return {
-        "recomendacion": respuesta.content,
+        "recomendacion": texto,
         "candidatos_rankeados": candidatos_rankeados,
         "criterio_busqueda": criterio,
     }

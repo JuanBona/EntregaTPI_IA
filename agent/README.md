@@ -20,18 +20,22 @@ Esto carga automáticamente todos los `perfiles/*.json` que haya en el repo.
 
 ## Archivos
 
-- `perfil.py` — `Perfil` (dataclass) + `cargar_perfil()` / `cargar_todos_los_perfiles()`.
-  Ver `perfiles/README.md` para el esquema del JSON.
-- `ranking.py` — `rankear_candidatos(candidatos, perfiles)`: puntúa cada candidato de
+- `perfil.py`: `Perfil` (dataclass) + `cargar_perfil()` / `cargar_todos_los_perfiles()`.
+  También `validar_generos_contra_dataset()`, que avisa géneros de perfiles que no
+  existen en el dataset. Ver `perfiles/README.md` para el esquema del JSON.
+- `ranking.py`: `rankear_candidatos(candidatos, perfiles)`, puntúa cada candidato de
   `rag.retriever` según cuántos perfiles lo bancan (géneros/títulos favoritos) vs.
-  cuántos lo evitarían (géneros/títulos en "no_banca"). Ver los pesos al inicio del
-  archivo si hay que ajustar la fórmula.
-- `mediador.py` — `recomendar_grupal(perfiles=None)`, la función principal. Internamente:
-  1. `construir_criterio_busqueda()` combina géneros/títulos/notas de los 5 perfiles en
-     una sola query de texto (sin incluir los "no banca" — ver el docstring del porqué).
+  cuántos lo evitarían (géneros/títulos en "no_banca"), más el score semántico que trae
+  el propio retriever. Ver los pesos y el diccionario de sinónimos de género al inicio
+  del archivo si hay que ajustar la fórmula.
+- `mediador.py`: `recomendar_grupal(perfiles=None)`, la función principal, ahora una
+  chain LCEL con memoria (`RunnableWithMessageHistory`) en vez de un `llm.invoke()`
+  suelto. Internamente:
+  1. `construir_criterio_busqueda()` combina géneros/títulos de los 5 perfiles en una
+     sola query de texto (sin "no_banca" ni `notas_libres`, ver el docstring del porqué).
   2. Llama a `rag.retriever(criterio, k=8)`.
   3. Rankea con `ranking.rankear_candidatos()` y se queda con el top 3.
-  4. Le pasa perfiles + top 3 al LLM (Gemini) con el system prompt de `/prompts` y
+  4. Le pasa perfiles + top 3 a la chain (Gemini + system prompt de `/prompts`) y
      devuelve la recomendación final en texto.
 
 ## Contrato con /notebook
