@@ -33,26 +33,34 @@ terminados (ver el "Correr cada módulo por separado" de cada README).
    (separados por película y libro), contenido que le gustó, géneros/títulos que no
    banca, y notas libres en texto natural. Ver `perfiles/README.md`.
 2. `agent/mediador.py` (función `recomendar_grupal()`) arranca cargando todos los
-   perfiles y arma un único criterio de búsqueda combinando los géneros y títulos
-   favoritos de los 5 (`construir_criterio_busqueda()`). Los "no banca" y las notas
-   libres **no** entran acá a propósito: los modelos de embeddings no manejan bien la
-   negación ("no me gusta terror" puede quedar cerca de "terror"), así que esas
-   negaciones se dejan para después.
-3. Ese criterio se manda a `rag.retriever(query, k)`, que busca por similitud semántica
-   sobre los ~276 ítems de `data/dataset.csv` (películas de TMDB + libros de Google
-   Books) ya embeddeados en ChromaDB (`data/chroma/`, se genera local, no se commitea),
-   y devuelve los `k` candidatos más parecidos.
-4. `agent/ranking.py` reordena esos candidatos según qué tan bien le cierran a los 5
-   perfiles **juntos**: suma puntos por cada género favorito que matchea, resta por
-   género o título que alguien no banca, y también pesa el rating y el score semántico
-   que ya trajo el retriever (para no perder esa señal). Incluye un mapeo de sinónimos
-   (ej. "thriller" ↔ "Suspense", "policial" ↔ "Crimen") porque los perfiles y el
-   dataset no siempre usan la misma palabra para lo mismo.
-5. Los top candidatos rankeados, junto con el resumen de los 5 perfiles, se le pasan a
-   una chain de LangChain (`ChatPromptTemplate` de `prompts/system_prompt.py` + Gemini,
-   con `RunnableWithMessageHistory` para tener memoria de conversación) que devuelve la
-   recomendación final: una sola opción, justificada, en tono argentino, sin inventar
-   datos que no estén en perfiles o candidatos.
+   perfiles y arma **dos** criterios de búsqueda por separado, uno de película y otro
+   de libro, combinando solo los géneros y títulos favoritos de ese tipo entre los 5
+   (`construir_criterio_busqueda(perfiles, tipo)`). Están separados a propósito: con un
+   único criterio mezclado, el vocabulario de películas (casi el doble de ítems que
+   libros en el dataset) ahogaba al de libros y el retriever casi no traía libros entre
+   los candidatos. Los "no banca" y las notas libres **no** entran acá a propósito: los
+   modelos de embeddings no manejan bien la negación ("no me gusta terror" puede quedar
+   cerca de "terror"), así que esas negaciones se dejan para después.
+3. Cada criterio se manda a `rag.retriever(query, k, tipo)`, que busca por similitud
+   semántica **dentro de ese tipo** (filtro `tipo=` sobre metadata) sobre los ~276
+   ítems de `data/dataset.csv` (películas de TMDB + libros de Google Books) ya
+   embeddeados en ChromaDB (`data/chroma/`, se genera local, no se commitea), y
+   devuelve los `k` candidatos más parecidos de ese tipo.
+4. `agent/ranking.py` reordena, por separado, los candidatos de cada tipo según qué
+   tan bien le cierran a los 5 perfiles **juntos**: suma puntos por cada género
+   favorito que matchea, resta por género o título que alguien no banca, y también
+   pesa el rating y el score semántico que ya trajo el retriever (para no perder esa
+   señal). Incluye un mapeo de sinónimos (ej. "thriller" ↔ "Suspense", "policial" ↔
+   "Crimen") porque los perfiles y el dataset no siempre usan la misma palabra para lo
+   mismo.
+5. Los top candidatos rankeados de cada tipo, junto con el resumen de los 5 perfiles,
+   se le pasan en una sola llamada a una chain de LangChain (`ChatPromptTemplate` de
+   `prompts/system_prompt.py` + Gemini, con `RunnableWithMessageHistory` para tener
+   memoria de conversación) que devuelve **dos** recomendaciones en el mismo texto, una
+   de película y una de libro (separadas con encabezados `## Pelicula` / `## Libro` que
+   `agent/mediador.py` después separa para mostrarlas en paneles distintos), cada una
+   justificada, en tono argentino, sin inventar datos que no estén en perfiles o
+   candidatos.
 6. Todo esto se prueba módulo por módulo en `.py` (ver `tests/`), se puede probar
    interactivamente con la interfaz Streamlit (`ui/app.py`), y se integra al final en
    `notebook/TP_recomendador_grupal.ipynb`, el entregable para Colab.

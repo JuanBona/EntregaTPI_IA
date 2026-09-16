@@ -108,19 +108,30 @@ for tab, (path, perfil) in zip(tabs, perfiles_con_paths):
             "Contenido favorito (uno por línea; formato 'Título | tipo', tipo opcional)",
             value=items_a_texto(perfil.contenido_favorito),
             key=f"contenido_{path.stem}",
+            help=(
+                "Una película o libro que ya viste/leíste y te gustó, uno por línea. "
+                "El tipo es 'pelicula' o 'libro', y es opcional: si lo dejás vacío "
+                "(solo el título, sin '|'), el sistema lo tiene en cuenta para ambas "
+                "listas. Ejemplo: 'El nombre del viento | libro'."
+            ),
         )
 
         sel_no_banca_generos = st.multiselect(
-            "Géneros que no banca",
+            "Géneros que no banca (de películas y de libros, todo junto)",
             options=sorted(set(opciones_pelicula) | set(opciones_libro) | set(perfil.no_banca_generos)),
             default=perfil.no_banca_generos,
             key=f"no_banca_generos_{path.stem}",
+            help=(
+                "Esta lista es una sola para los dos tipos: un género acá se descarta "
+                "tanto si aparece en una película candidata como en un libro."
+            ),
         )
 
         no_banca_titulos_texto = st.text_area(
             "Títulos que no banca (uno por línea; formato 'Título | tipo')",
             value=items_a_texto(perfil.no_banca_titulos),
             key=f"no_banca_titulos_{path.stem}",
+            help="Mismo formato que 'Contenido favorito': 'Título | tipo', tipo opcional.",
         )
 
         notas = st.text_area(
@@ -178,14 +189,17 @@ if st.button("Generar recomendación grupal", type="primary"):
 
 resultado = st.session_state.resultado
 if resultado:
-    st.subheader("Criterio de búsqueda usado")
-    st.caption(resultado["criterio_busqueda"])
-
-    st.subheader("Candidatos rankeados")
-    st.dataframe(pd.DataFrame(resultado["candidatos_rankeados"]))
-
-    st.subheader("Recomendación final")
-    st.markdown(resultado["recomendacion"])
+    col_peliculas, col_libros = st.columns(2)
+    with col_peliculas:
+        st.subheader("Películas")
+        st.caption(resultado["criterio_busqueda_peliculas"] or "(sin géneros/títulos de película en los perfiles)")
+        st.dataframe(pd.DataFrame(resultado["candidatos_rankeados_peliculas"]))
+        st.markdown(resultado["recomendacion_peliculas"])
+    with col_libros:
+        st.subheader("Libros")
+        st.caption(resultado["criterio_busqueda_libros"] or "(sin géneros/títulos de libro en los perfiles)")
+        st.dataframe(pd.DataFrame(resultado["candidatos_rankeados_libros"]))
+        st.markdown(resultado["recomendacion_libros"])
 
     st.divider()
     st.caption(
