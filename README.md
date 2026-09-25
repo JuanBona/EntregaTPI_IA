@@ -1,11 +1,10 @@
 # Recomendador grupal de películas y libros
 
 TP2 de Sistemas Inteligentes, sistema de RAG + agente (Langchain + Gemini) que cruza
-los gustos de 5 personas y devuelve una recomendación final justificada, en tono
-canchero argentino.
+los gustos de 5 personas y devuelve una recomendación final justificada.
 
 Ver `docs/DISENO.md` para el detalle de todas las decisiones de diseño (qué se eligió
-y por qué), es material directo para la defensa oral.
+y por qué).
 
 ## Arquitectura
 
@@ -39,7 +38,7 @@ terminados (ver el "Correr cada módulo por separado" de cada README).
    negación ("no me gusta terror" puede quedar cerca de "terror"), así que esas
    negaciones se dejan para después.
 3. Ese criterio se manda a `rag.retriever(query, k)`, que busca por similitud semántica
-   sobre los ~276 ítems de `data/dataset.csv` (películas de TMDB + libros de Google
+   sobre los aprox. 276 ítems de `data/dataset.csv` (películas de TMDB + libros de Google
    Books) ya embeddeados en ChromaDB (`data/chroma/`, se genera local, no se commitea),
    y devuelve los `k` candidatos más parecidos.
 4. `agent/ranking.py` reordena esos candidatos según qué tan bien le cierran a los 5
@@ -106,9 +105,6 @@ Abre automáticamente `http://localhost:8501` en el navegador. Necesita `GOOGLE_
 en el `.env` (ver arriba) y que `data/dataset.csv` exista, el vectorstore se genera
 solo la primera vez que se corre.
 
-Es una herramienta separada de `notebook/` (pensada para desarrollo y para la defensa
-oral), no un entregable del TP.
-
 ## Cargar tu perfil
 
 Copiar `perfiles/ejemplo_perfil.json` a `perfiles/<tu_nombre>.json` y completarlo. Ver
@@ -148,7 +144,7 @@ al final una vez que las otras 4 ramas ya están en `main`.
 ├── .gitignore
 ├── resultados_pruebas_retriever.txt   # corridas de rag.retriever() contra el dataset real
 ├── docs/
-│   └── DISENO.md                      # decisiones de diseño, material para la defensa
+│   └── DISENO.md                      # decisiones de diseño
 ├── perfiles/
 │   ├── ejemplo_perfil.json            # plantilla para copiar como perfiles/<nombre>.json
 │   └── README.md                      # esquema de los campos del perfil
