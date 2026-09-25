@@ -45,15 +45,20 @@ perfiles = """
 - Juan: le gustan drama y policial. No banca terror.
 """
 
-candidatos = """
+candidatos_peliculas = """
 - "Prisoners" (pelicula, 2013, rating 8.1): thriller dramatico sobre una investigacion
   desesperada despues de una desaparicion.
 - "Arrival" (pelicula, 2016, rating 7.6): ciencia ficcion introspectiva sobre lenguaje,
   memoria y contacto extraterrestre.
 """
 
+candidatos_libros = """
+- "El nombre del viento" (libro, 2007, rating 8.9): fantasia narrada por su propio
+  protagonista, sobre su ascenso a leyenda.
+"""
+
 print(get_system_prompt())
-print(build_user_prompt(perfiles, candidatos))
+print(build_user_prompt(perfiles, candidatos_peliculas, candidatos_libros))
 ```
 
 Para probar la respuesta completa hace falta que `agent/` pueda llamar al LLM.
