@@ -1,7 +1,6 @@
 # Decisiones de diseño
 
-Documento de referencia para la defensa oral del TP ("Identificación de dificultades" /
-"Documentación técnica" en la rúbrica). Explica qué se decidió y por qué.
+Decisiones técnicas del proyecto y los problemas que fuimos encontrando.
 
 ## Arquitectura general
 
@@ -26,7 +25,7 @@ ingestion/  →  data/dataset.csv  →  rag/  →  data/chroma/  →  agent/  �
 
 El stack ya usa Gemini (Google) como LLM. Sumar OpenAI *solo* para embeddings agrega:
 una API key más para gestionar entre 5 personas, un costo (aunque bajo) por llamada, y un
-punto de falla extra el día de la defensa si no hay internet estable.
+punto de falla extra si no hay internet estable.
 
 Se usa `sentence-transformers/paraphrase-multilingual-mpnet-base-v2` vía
 `langchain-huggingface`, corriendo local (CPU alcanza para el tamaño del dataset del TP):
@@ -39,10 +38,8 @@ Se usa `sentence-transformers/paraphrase-multilingual-mpnet-base-v2` vía
   OpenAI o Voyage AI en inglés puro, y la primera corrida en Colab tarda un poco más porque
   descarga el modelo (~1 GB). Para el volumen de datos de este TP (cientos de ítems, no
   millones) esa diferencia no es perceptible en la calidad de las recomendaciones finales.
-- **Alternativa considerada**: Voyage AI (partner recomendado por Anthropic, mejor calidad,
-  free tier generoso), se descartó por sumar una tercera dependencia de red/API key sin
-  necesidad para el alcance del TP. Si el resultado con HuggingFace local no convence,
-  migrar a Voyage es un cambio de una sola línea en `rag/vectorstore.py`.
+- Se descartó Voyage AI por sumar otra dependencia de red y API key sin necesidad para el
+  alcance del TP.
 
 ## Por qué LangChain como framework, y no como wrapper fino
 
@@ -101,8 +98,7 @@ API original durante debugging) e `idioma`, además de las 6 columnas mínimas p
 
 ## Dificultades encontradas
 
-Problemas reales detectados revisando el sistema contra el dataset real (no sospechas),
-con cómo se resolvió cada uno:
+Problemas detectados al probar el sistema con el dataset real, y cómo se resolvió cada uno:
 
 - **Géneros que no matcheaban por tildes.** Los perfiles se tipean a mano sin tildes
   ("ciencia ficcion") pero el dataset viene de TMDB/Google Books con tildes ("Ciencia
@@ -151,11 +147,3 @@ con cómo se resolvió cada uno:
   top), pero el fix de sinónimos de `agent/ranking.py` no lo toca, porque actúa
   *después* de la búsqueda semántica, no en el retriever. Queda como límite conocido
   del approach de embeddings genéricos para este volumen de datos.
-
-## Flujo de git
-
-`main` protegida. Ramas por módulo: `feature/ingestion`, `feature/rag`, `feature/agent`,
-`feature/prompts`, `feature/notebook`. Cada una mergea a `main` vía Pull Request con al
-menos 1 review de otro integrante. Como cada rama toca solo su carpeta, los conflictos de
-merge deberían ser mínimos o nulos, el único archivo compartido es `notebook/` que se
-arma al final, integrando el trabajo ya mergeado de las otras 4 ramas.

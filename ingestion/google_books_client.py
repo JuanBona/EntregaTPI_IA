@@ -11,9 +11,7 @@ import requests
 
 GOOGLE_BOOKS_BASE_URL = "https://www.googleapis.com/books/v1/volumes"
 
-# Géneros/temas usados como queries de búsqueda, ya que Google Books no tiene
-# un endpoint de "discover por género" como TMDB. Se mantienen en español porque
-# así quedan etiquetados los libros en el dataset (consistente con los géneros de TMDB).
+# Temas usados como queries (Google Books no tiene "discover por género" como TMDB).
 GENEROS_BUSQUEDA = [
     "ficción",
     "ciencia ficción",
@@ -27,8 +25,7 @@ GENEROS_BUSQUEDA = [
     "poesía",
 ]
 
-# El subject metadata de Google Books está mayormente en inglés (BISAC/LCSH), así
-# que traducimos el género antes de armar la query para no perder resultados.
+# Los subjects de Google Books están en inglés: se traduce el género antes de buscar.
 _TRADUCCION_GENERO_BUSQUEDA = {
     "ficción": "fiction",
     "ciencia ficción": "science fiction",

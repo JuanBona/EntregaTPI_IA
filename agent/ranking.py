@@ -10,10 +10,7 @@ PESO_TITULO_NO_BANCADO = -3.0
 PESO_RATING = 0.1  # rating típico 0-10, así aporta hasta +1 al score
 PESO_SEMANTICO = 0.3  # score del retriever es una distancia (más bajo = más parecido)
 
-# Los perfiles tipean el género de películas ("thriller") o de libros ("policial") como
-# les sale, pero el dataset los etiqueta con el término que usa TMDB/Google Books
-# ("Suspense", "Crimen"). Sin este mapeo esos géneros nunca matcheaban aunque el
-# usuario los haya puesto bien.
+# El dataset usa los términos de TMDB/Google Books ("Suspense", "Crimen").
 _SINONIMOS_GENERO = {
     "thriller": "suspense",
     "policial": "crimen",
@@ -21,14 +18,7 @@ _SINONIMOS_GENERO = {
 
 
 def _normalizar(texto: str) -> str:
-    """Minúsculas y sin tildes/diacríticos.
-
-    Los géneros del dataset vienen de TMDB/Google Books con tildes ("Ciencia
-    ficción", "Acción"), pero los perfiles los tipean a mano y no siempre las
-    ponen ("ciencia ficcion", "accion"). Sin esto, esas comparaciones nunca
-    matcheaban y el ranking terminaba ignorando la mayoría de los gustos reales
-    del grupo.
-    """
+    """Minúsculas y sin tildes: "Ciencia ficción" y "ciencia ficcion" comparan igual."""
     sin_tildes = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
     return sin_tildes.lower()
 

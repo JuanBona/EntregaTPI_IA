@@ -156,9 +156,7 @@ for tab, (path, perfil) in zip(tabs, perfiles_con_paths):
 st.divider()
 st.header("Recomendación grupal")
 
-# Un id de conversación por pestaña/sesión del navegador, para que la memoria del
-# agente (RunnableWithMessageHistory en agent/mediador.py) no se mezcle entre gente
-# distinta usando la demo al mismo tiempo.
+# Un id de conversación por sesión del navegador, para que no se mezcle la memoria del agente.
 if "chat_session_id" not in st.session_state:
     st.session_state.chat_session_id = str(uuid.uuid4())
 if "resultado" not in st.session_state:

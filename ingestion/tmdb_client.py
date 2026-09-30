@@ -81,6 +81,6 @@ def buscar_peliculas(paginas: int = 5, idioma: str = "es-AR") -> list[dict]:
             ]
         peliculas.extend(resultados)
 
-        time.sleep(0.25)  # buena práctica para no pegarle todo de golpe a la API
+        time.sleep(0.25)  # evita rate limit
 
     return peliculas

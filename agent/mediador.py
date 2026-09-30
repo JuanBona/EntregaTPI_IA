@@ -74,8 +74,7 @@ def _resumen_candidatos_para_prompt(candidatos: list[dict]) -> str:
     return "\n".join(lineas)
 
 
-# Marca el corte entre la sección de película y la de libro en el texto que devuelve
-# el LLM (ver prompts/system_prompt.py, el prompt le pide que respete este encabezado).
+# Encabezado que separa película y libro en la respuesta del LLM (ver prompts/system_prompt.py).
 _MARCA_SEPARACION_LIBRO = "## Libro"
 
 
@@ -94,7 +93,7 @@ def _get_llm() -> ChatGoogleGenerativeAI:
     return ChatGoogleGenerativeAI(model=modelo, temperature=0.7)
 
 
-# Memoria en RAM por session_id (alcanza para el TP; no hace falta persistirla).
+# Memoria en RAM por session_id.
 _historiales: dict[str, InMemoryChatMessageHistory] = {}
 
 
