@@ -3,8 +3,7 @@
 TP2 de Sistemas Inteligentes, sistema de RAG + agente (Langchain + Gemini) que cruza
 los gustos de 5 personas y devuelve una recomendación final justificada.
 
-Ver `docs/DISENO.md` para el detalle de todas las decisiones de diseño (qué se eligió
-y por qué).
+Las decisiones de diseño están en `docs/DISENO.md`.
 
 ## Arquitectura
 
@@ -118,29 +117,10 @@ solo la primera vez que se corre.
 Copiar `perfiles/ejemplo_perfil.json` a `perfiles/<tu_nombre>.json` y completarlo. Ver
 `perfiles/README.md` para el esquema completo.
 
-## Armar el notebook final
+## Notebook
 
-El desarrollo se hace en módulos `.py` (para trabajar los 5 en paralelo sin pisarse en
-un mismo `.ipynb`). El entregable final es `notebook/TP_recomendador_grupal.ipynb`,
-que importa los 4 módulos y los corre en Colab. Instrucciones de armado en
-`notebook/README.md`.
-
-## Flujo de trabajo en git
-
-`main` protegida. Una rama por módulo:
-
-```
-feature/ingestion
-feature/rag
-feature/agent
-feature/prompts
-feature/notebook
-```
-
-Cada quien mergea su rama a `main` vía Pull Request, con al menos 1 review de otro
-integrante del equipo. Como cada rama toca una carpeta distinta, los conflictos de
-merge deberían ser mínimos. El único paso secuencial real es `notebook/`, que se arma
-al final una vez que las otras 4 ramas ya están en `main`.
+`notebook/TP_recomendador_grupal.ipynb` importa los módulos `.py` y corre todo el flujo
+en Colab. Ver `notebook/README.md`.
 
 ## Estructura del repo
 
@@ -150,7 +130,6 @@ al final una vez que las otras 4 ramas ya están en `main`.
 ├── requirements.txt                   # dependencias con versiones fijas
 ├── .env.example                       # plantilla de API keys y config (copiar a .env)
 ├── .gitignore
-├── resultados_pruebas_retriever.txt   # corridas de rag.retriever() contra el dataset real
 ├── docs/
 │   └── DISENO.md                      # decisiones de diseño
 ├── perfiles/
@@ -175,7 +154,6 @@ al final una vez que las otras 4 ramas ya están en `main`.
 │   └── README.md
 ├── prompts/
 │   ├── system_prompt.py               # personalidad del agente y el ChatPromptTemplate (LCEL)
-│   ├── ejemplos_tono.md               # ejemplos de respuestas buenas/malas
 │   └── README.md
 ├── notebook/
 │   ├── TP_recomendador_grupal.ipynb   # entregable final para Colab

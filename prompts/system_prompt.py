@@ -70,7 +70,7 @@ MENSAJE_DEFAULT = (
     "informacion fuera de estos datos."
 )
 
-# Chain LCEL: system prompt + historial de la conversacion (para memoria) + pedido actual.
+# Chain LCEL: system prompt + historial + pedido actual.
 prompt = ChatPromptTemplate.from_messages(
     [
         ("system", SYSTEM_PROMPT),

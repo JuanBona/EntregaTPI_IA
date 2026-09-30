@@ -18,8 +18,6 @@ logica de perfiles, ranking o RAG.
 
 - `system_prompt.py`: contiene `SYSTEM_PROMPT`, `get_system_prompt()` y
   `build_user_prompt(...)`, usados por `agent/mediador.py`.
-- `ejemplos_tono.md`: ejemplos de respuestas malas y buenas, mas un checklist para
-  revisar la salida del LLM.
 
 ## Contrato con agent/
 

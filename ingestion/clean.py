@@ -55,12 +55,11 @@ def normalizar_libros(libros_crudos: list[dict]) -> pd.DataFrame:
 
         autores = info.get("authors") or []
 
-        # --- NUEVO: Normalización e imputación de rating ---
         rating_crudo = info.get("averageRating")
         if pd.notna(rating_crudo):
             rating_normalizado = rating_crudo * 2
         else:
-            rating_normalizado = 6.0  # Imputamos 6.0 para no romper el RAG
+            rating_normalizado = 6.0  # sin rating en Google Books: valor neutro
 
         filas.append(
             {
@@ -69,7 +68,7 @@ def normalizar_libros(libros_crudos: list[dict]) -> pd.DataFrame:
                 "titulo": titulo,
                 "sinopsis": sinopsis,
                 "generos": item.get("_genero_buscado", ""),
-                "rating": rating_normalizado,  # Usamos la variable normalizada
+                "rating": rating_normalizado,
                 "anio": anio,
                 "fuente": "google_books",
                 "fuente_id": item.get("id"),
